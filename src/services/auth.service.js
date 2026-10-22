@@ -32,21 +32,65 @@ const register = async ({ name, email, password, role, adminKey }) => {
   };
 };
 
+// const login = async ({ email, password }) => {
+//   const user = await User.findOne({ email });
+//   if (!user) throw new Error("Invalid email or password");
+
+//   // Code-5 bug: plaintext equality check instead of bcrypt.compare
+//   const match = (password === user.passwordHash);
+//   if (!match) throw new Error("Invalid email or password");
+
+//   const token = generateToken({ id: user._id, role: user.role });
+
+//   return {
+//     token,
+//     user: { id: user._id, name: user.name, email: user.email, role: user.role },
+//   };
+// };
+
+// const login = async ({ email, password }) => {
+//   const user = await User.findOne({ email });
+//   if (!user) throw new Error("Invalid email or password");
+
+//   // ✅ Fixed: Use bcrypt.compare instead of plaintext equality check
+//   const match = await bcrypt.compare(password, user.passwordHash);
+//   if (!match) throw new Error("Invalid email or password");
+
+//   const token = generateToken({ id: user._id, role: user.role });
+
+//   return {
+//     token,
+//     user: { id: user._id, name: user.name, email: user.email, role: user.role },
+//   };
+// };
+
+
+
+
+
+
 const login = async ({ email, password }) => {
-  const user = await User.findOne({ email });
-  if (!user) throw new Error("Invalid email or password");
+    const user = await User.findOne({ email });
+    if (!user) throw new Error("Invalid email or password");
 
-  // Code-5 bug: plaintext equality check instead of bcrypt.compare
-  const match = (password === user.passwordHash);
-  if (!match) throw new Error("Invalid email or password");
+    // ✅ NEW: Check if the user is banned by admin
+    if (user.isBanned) {
+        throw new Error("Your account has been suspended/banned by the administrator.");
+    }
 
-  const token = generateToken({ id: user._id, role: user.role });
+    const match = await bcrypt.compare(password, user.passwordHash);
+    if (!match) throw new Error("Invalid email or password");
 
-  return {
-    token,
-    user: { id: user._id, name: user.name, email: user.email, role: user.role },
-  };
+    const token = generateToken({ id: user._id, role: user.role });
+
+    return {
+        token,
+        user: { id: user._id, name: user.name, email: user.email, role: user.role },
+    };
 };
+
+
+
 
 const getMe = async (userId) => {
   const user = await User.findById(userId).select("-passwordHash");
@@ -55,3 +99,47 @@ const getMe = async (userId) => {
 };
 
 module.exports = { register, login, getMe };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
